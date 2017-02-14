@@ -1,4 +1,3 @@
-from flask import Flask
 import os, ocr
 from flask import Flask, jsonify
 
