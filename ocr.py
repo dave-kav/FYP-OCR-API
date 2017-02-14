@@ -15,6 +15,7 @@ Description:    Sandbox for testing and evaluating Image processing libraries
 import sys
 import cv2
 import numpy as np
+import pymysql
 import pytesseract as tess
 from PIL import Image, ImageFilter, ImageOps
 
@@ -36,13 +37,7 @@ class OCR:
         """
         global cropped_img
         try:
-            img = Image.open(self.input_file)
-            img.save(self.input_file, dpi=(500,500))
-            img = Image.open(self.input_file)
-            gray_img = ImageOps.grayscale(img)
-
-            #crop desired region
-            self.img = gray_img.crop((20,500,1200,1720))
+            self.img = Image.open(self.input_file)
 
         except:
             print "ERROR: Unable to load image!"
@@ -66,27 +61,20 @@ class OCR:
         """
         Treats the image, subjecting it to various steps in order to enhance the possibility of accurate text recognition.
         """
-        img = self.img.filter(ImageFilter.UnsharpMask)
+        gray_img = ImageOps.grayscale(self.img)
+
+        # crop desired region
+        #cropped_img = gray_img.crop((20, 500, 1200, 1720))
+        #cropped_img = gray_img.crop((900, 500, 1300, 820))
+        cropped_img = gray_img.crop((120, 1350, 2300, 3020))
+
+        img = cropped_img.filter(ImageFilter.UnsharpMask)
         img = ImageOps.autocontrast(img)
         img = img.filter(ImageFilter.GaussianBlur)
         img = img.filter(ImageFilter.SHARPEN)
-        self.img = img.point(lambda x: 0 if x<150 else 250, '1')
 
-        """
-        # Make a copy to play with the indices.
-        img = np.array(img)
-
-        # Replace places with 3rd coordinate greater than 100 with the white-color
-        # vector [255, 255, 255]
-        indices = img[:, :, 2] > 100
-        img[indices] = [0, 0, 0]
-        # Replace places with 3rd coordinate greater than 0 with the black-color
-        indices = img[:, :, 2] > 0
-        img[indices] = [255, 255, 255]
-
-        img = Image.fromarray(img)
-        """
-        #self.img = ImageOps.invert(img)
+        #convert from grayscale to pure black and white
+        self.img = img.point(lambda x: 0 if x<125 else 250, '1')
 
     def detect_text(self):
         """
@@ -96,7 +84,6 @@ class OCR:
         if len(self.text) < 1:
             self.text = "No text detected in this image!"
 
-    #Perform OCR
     def ocr(self):
         """
         Perform OCR on an image
@@ -110,6 +97,7 @@ class OCR:
         return self.text
 
 if __name__ == "__main__":
-    file_path = sys.argv[1]
-    ocr_obj = OCR(file_path)
-    print ocr_obj.ocr()
+    #file_path = sys.argv[1]
+    #ocr_obj = OCR(file_path)
+    #print ocr_obj.ocr()
+    db();
