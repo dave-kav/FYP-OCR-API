@@ -13,9 +13,13 @@ Description:    Sandbox for testing and evaluating Image processing libraries
 © Dave Kavanagh, 2017
 """
 import sys
+<<<<<<< HEAD
 import cv2
 import numpy as np
 import pymysql
+=======
+import numpy as np
+>>>>>>> 7349cb9d052082289bdc92897481da346d23355d
 import pytesseract as tess
 from PIL import Image, ImageFilter, ImageOps
 
@@ -97,7 +101,13 @@ class OCR:
         return self.text
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     #file_path = sys.argv[1]
     #ocr_obj = OCR(file_path)
     #print ocr_obj.ocr()
     db();
+=======
+    file_path = sys.argv[1]
+    ocr_obj = OCR(file_path)
+    print ocr_obj.ocr()
+>>>>>>> 7349cb9d052082289bdc92897481da346d23355d

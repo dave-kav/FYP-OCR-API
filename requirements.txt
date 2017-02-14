@@ -1,0 +1,4 @@
+Flask==0.10.1
+numpy==1.11.3
+pytesseract==0.1.6
+Pillow==4.0.0
