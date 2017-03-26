@@ -6,9 +6,9 @@ Author:         Dave Kavanagh
 
 Date:           31/01/2017
 
-Description:    Sandbox for testing and evaluating Image processing libraries
-                with a view to determining what is necessary in order to proceed
-                with the OCR element of the project.
+Description:    Receives image data via the constructor and performs ocr on 
+                specfically mapped portions of the image, returning the text 
+                as JSON.
 
 © Dave Kavanagh, 2017
 """
@@ -32,7 +32,7 @@ class OCR:
 
     def open_image(self):
         """
-        Attempts to load an image from disk, converts to grayscale, and crops out unnecessary portion of the image.
+        Attempts to load an image from disk.
         """
         global cropped_img
         try:
@@ -90,7 +90,7 @@ class OCR:
         if self.input_file:
             self.open_image()
             self.process_image()
-            self.img.show()
+            "self.img.show()"
             self.detect_text()
 
         return self.text
