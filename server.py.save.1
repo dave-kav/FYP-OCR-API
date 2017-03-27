@@ -1,21 +1,11 @@
 import os, ocr
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from OpenSSL import SSL
-
-app = Flask(__name__)
+pp = Flask(__name__)
 app.debug = True
 CORS(app)
 
-def _force_https():
-    from flask import _request_ctx_stack
-    if _request_ctx_stack is not None:
-        reqctx = _request_ctx_stack.top
-        reqctx.url_adapter.url_scheme = 'https'
-
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
-app.before_request(_force_https)
-context = ('cert.crt','key.key')
 
 @app.route('/')
 def hello_world():
@@ -29,17 +19,17 @@ def welcome():
 def do_ocr():
 	if request.method == 'POST':
 		if 'imgData' in request.values:
-			print 'image string POSTed to server!'
+			print 'found the data!'
 		else:
-			print "image did not POST!"
+			print "didn't find the data!"
 
 	image = 'static/images/bet2.jpg'
 	ocr_obj = ocr.OCR(image)
 	text = ocr_obj.ocr()
-	data = {'time': '14:35', 'track': 'Galway', 'selection': 'Kauto Star', 'odds': '21/20'}
+	data = {'time': '12:25', 'track': 'kempton', 'selection': 'Shergar', 'odds': '21/20'}
 	return jsonify(ocr=data)
 
 port = os.getenv('PORT', '443')
 if __name__ == "__main__":
-	app.run(host='0.0.0.0', port=int(port), ssl_context=context)
+	app.run(host='0.0.0.0', port=int(port))
 

@@ -34,12 +34,12 @@ def do_ocr():
 			print "image did not POST!"
 
 	image = 'static/images/bet2.jpg'
-	ocr_obj = ocr.OCR(image)
+	ocr_obj = ocr.OC(image)
 	text = ocr_obj.ocr()
-	data = {'time': '14:35', 'track': 'Galway', 'selection': 'Kauto Star', 'odds': '21/20'}
+	data = {'time': '14:25', 'track': 'Punchestown', 'selection': 'Kauto Star', 'odds': '21/20'}
 	return jsonify(ocr=data)
 
-port = os.getenv('PORT', '443')
+port = os.getenv('PORT', '8080')
 if __name__ == "__main__":
 	app.run(host='0.0.0.0', port=int(port), ssl_context=context)
 
