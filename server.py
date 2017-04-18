@@ -45,7 +45,7 @@ def identify_stake():
         data = {'stake': '25.00'}
         return jsonify(ocr=data)
 
-port = os.getenv('PORT', '8081')
+port = os.getenv('PORT', '443')
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=int(port))
+    app.run(host='0.0.0.0', port=int(port), ssl_context=context)
 
