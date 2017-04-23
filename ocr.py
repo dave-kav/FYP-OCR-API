@@ -27,7 +27,7 @@ class OCR:
     def __init__(self, input_file):
         """
         Constructor
-        :param input_file: file path passed from command line
+        :param input_file: base64 string passed invoking function
         """
         #remove image encoding prefix
         image_data = input_file[24:]
@@ -53,6 +53,7 @@ class OCR:
 
         # convert from grayscale to pure black and white
         img = img.point(lambda x: 0 if x < 125 else 250, '1')
+
         return img
 
     def process_image(self):
@@ -60,23 +61,20 @@ class OCR:
         Treats the image, subjecting it to various steps in order to enhance the possibility of accurate text recognition.
         """
         gray_img = ImageOps.grayscale(self.img)
+	treated_img = self.treat_image(gray_img)
 
         # crop desired regions
         # time region
-        time_section = gray_img.crop((920, 630, 1600, 1020))
-        self.time_section = self.treat_image(time_section)
+        self.time_section = treated_img.crop((920, 630, 1600, 1020))
 
         # selection region
-        selection_section = gray_img.crop((920, 950, 1600, 1520))
-        self.selection_section = self.treat_image(selection_section)
+        self.selection_section = treated_img.crop((920, 950, 1600, 1520))
 
         # odds region
-        odds_section = gray_img.crop((920, 1550, 1600, 1970))
-        self.odds_section = self.treat_image(odds_section)#odds region
+        self.odds_section = treated_img.crop((920, 1550, 1600, 1970))
 
         # stake region
-        stake_section = gray_img.crop((1160, 2200, 1700, 2350))
-        self.stake_section = self.treat_image(stake_section)
+        self.stake_section = treated_img.crop((1160, 2200, 1700, 2350))
 
     def detect_text(self, img, section):
         """
@@ -105,6 +103,10 @@ class OCR:
                 time = time.replace('-', ':')
             if ';' in time:
                 time = time.replace(';', ':')
+	    if time[2] != ':':
+		str = list(time)
+		str[2] = ':'
+		time = "".join(str)
 
             #detect selection
             #self.selection_section.show()

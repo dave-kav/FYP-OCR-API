@@ -22,11 +22,11 @@ def analyze_bet():
             print data
             return jsonify(ocr=data)
         else:
-            data = {'time': '', 'track': '', 'selection': '', 'odds': ''}
+            data = {'time': '', 'selection': '', 'odds': ''}
             return jsonify(ocr=data)
     else:
         #dummy data for dev
-        data = {'time': '14:35', 'track': 'Galway', 'selection': 'Kauto Star', 'odds': '21/20'}
+        data = {'time': '14:35', 'selection': 'Kauto Star', 'odds': '21/20'}
         return jsonify(ocr=data)
 
 @app.route('/ocr/stake', methods=['GET', 'POST'])
