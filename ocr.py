@@ -13,9 +13,7 @@ Description:    Receives image data via the constructor and performs ocr on
 © Dave Kavanagh, 2017
 """
 from io import BytesIO
-import re
 import base64
-import numpy as np
 import pytesseract as tess
 from PIL import Image, ImageFilter, ImageOps
 
@@ -33,11 +31,12 @@ class OCR:
         image_data = input_file[24:]
         self.input_file = image_data
 
+
     def open_image(self):
         """
         Attempts to load an image from disk.
         """
-        global cropped_img
+
         try:
             self.img = Image.open(BytesIO(base64.b64decode(self.input_file)))
 
@@ -45,11 +44,16 @@ class OCR:
             print "ERROR: Unable to load image!"
             exit(1)
 
+        print self.img.size
+        self.img = self.img.resize((1000,1300))
+
     def treat_image(self, img):
+
         img = img.filter(ImageFilter.UnsharpMask)
-        img = ImageOps.autocontrast(img)
+        img = img.filter(ImageFilter.EDGE_ENHANCE)
         img = img.filter(ImageFilter.GaussianBlur)
-        img = img.filter(ImageFilter.SHARPEN)
+        img = img.filter(ImageFilter.MedianFilter)
+        img = img.filter(ImageFilter.SMOOTH)
 
         # convert from grayscale to pure black and white
         img = img.point(lambda x: 0 if x < 125 else 250, '1')
@@ -61,20 +65,20 @@ class OCR:
         Treats the image, subjecting it to various steps in order to enhance the possibility of accurate text recognition.
         """
         gray_img = ImageOps.grayscale(self.img)
-	treated_img = self.treat_image(gray_img)
+        treated_img = self.treat_image(gray_img)
 
         # crop desired regions
         # time region
-        self.time_section = treated_img.crop((920, 630, 1600, 1020))
+        self.time_section = treated_img.crop((510, 350, 925, 510))
 
         # selection region
-        self.selection_section = treated_img.crop((920, 950, 1600, 1520))
+        self.selection_section = treated_img.crop((510, 515, 885, 750))
 
         # odds region
-        self.odds_section = treated_img.crop((920, 1550, 1600, 1970))
+        self.odds_section = treated_img.crop((510, 815, 885, 1050))
 
         # stake region
-        self.stake_section = treated_img.crop((1160, 2200, 1700, 2350))
+        self.stake_section = treated_img.crop((660, 1080, 950, 1175))
 
     def detect_text(self, img, section):
         """
@@ -94,26 +98,34 @@ class OCR:
             self.open_image()
             self.process_image()
 
-            #detect time
-            #self.time_section.show()
+            # detect time
+            self.time_section.show()
             time = self.detect_text(self.time_section, 'time')
             if '.' in time:
                 time = time.replace('.', ':')
             if '-' in time:
                 time = time.replace('-', ':')
+            if '+' in time:
+                time = time.replace('+', '0')
             if ';' in time:
                 time = time.replace(';', ':')
-	    if time[2] != ':':
-		str = list(time)
-		str[2] = ':'
-		time = "".join(str)
 
-            #detect selection
-            #self.selection_section.show()
+            if time[2] != ':':
+                str = list(time)
+                str[2] = ':'
+                time = "".join(str)
+
+            if len(time) > 5:
+                time = time[:5]
+
+            # detect selection
+            self.selection_section.show()
             selection = self.detect_text(self.selection_section, 'selection')
+            if '/' in selection:
+                selection = selection.replace('/', '1')
 
             # detect odds
-            #self.odds_section.show()
+            self.odds_section.show()
             odds = self.detect_text(self.odds_section, 'odds')
             if '.' in odds:
                 odds = odds.replace('.', '/')
@@ -134,15 +146,42 @@ class OCR:
             # detect stake
             self.stake_section.show()
             stake = self.detect_text(self.stake_section, 'stake')
-            print stake
-            if 'o' in stake:
-                stake = stake.replace('o', '0')
-            if 'O' in stake:
-                stake = stake.replace('O', '0')
 
+            # print for debugging
+            print "Stake identified as",stake
+            if 'No text' not in stake:
+                if 'o' in stake:
+                    stake = stake.replace('o', '0')
+                if 'O' in stake:
+                    stake = stake.replace('O', '0')
+                if 'C)' in stake:
+                    stake = stake.replace('C)', '0')
+                if 'C' in stake:
+                    stake = stake.replace('C', '0')
+                if 'c)' in stake:
+                    stake = stake.replace('c)', '0')
+                if 'c' in stake:
+                    stake = stake.replace('c', '0')
+                if ',' in stake:
+                    stake = stake.replace(',', '.')
+                if '~' in stake:
+                    stake = stake.replace('~', '.')
+                if '-' in stake:
+                    stake = stake.replace('-', '.')
+                if 'i' in stake:
+                    stake = stake.replace('i', '1')
+                if 'I' in stake:
+                    stake = stake.replace('I', '1')
+                if 's' in stake:
+                    stake = stake.replace('s', '5')
+                if 'S' in stake:
+                    stake = stake.replace('S', '5')
+                if ')' in stake:
+                    stake = stake.replace(')', '')
+                if ' ' in stake:
+                    stake = stake.replace(' ', '')
+
+            #_stake = ''.join(i for i in stake if i.isdigit())
             ocr_data = {'stake': stake}
 
-        return ocr_data
-
-
-
+            return ocr_data
